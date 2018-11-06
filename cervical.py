@@ -6,6 +6,7 @@ from sklearn import preprocessing
 from sklearn.preprocessing import Imputer
 from pandas.plotting import scatter_matrix
 from sklearn import svm
+
 import warnings
 warnings.filterwarnings("ignore")
 
@@ -17,21 +18,28 @@ df=pd.read_csv("AJA/risk_factors_cervical_cancer.csv")
 df = df.drop(columns="STDs: Time since last diagnosis")
 df = df.drop(columns="STDs: Time since first diagnosis")
 
-
+import seaborn as sns
+corr = df.corr()
+sns.heatmap(corr,
+            xticklabels=corr.columns.values,
+            yticklabels=corr.columns.values)
 
 
 columns = list(df.keys())
-features = [[-5]*len(df['Biopsy'])]*len(columns)
+features = []
 for i in range(0,len(columns)):
     j = np.where(np.array(df[columns[i]])=='?')
     temp = []
+    # print(j[0])
     for k in range(0,len(df[columns[i]])):
         if not (k in j[0]):
+            # print(i,k)
             temp.append(float(df[columns[i]][k]))
-            features[i][k] = float(df[columns[i]][k])
-    features[:] = [x if x != -5 else float(sum(temp))/len(temp) for x in features]
+        else :
+            temp.append(float(sum(temp)/len(temp)))
+    features.append(temp)
 
-
+print(features)
 X = []
 for i in range(0,len(features[0])):
     temp = []
@@ -40,26 +48,6 @@ for i in range(0,len(features[0])):
     X.append(temp)
 
 y=df["Biopsy"]
-
-
-def correlation_matrix(df):
-    from matplotlib import pyplot as plt
-    from matplotlib import cm as cm
-
-    fig = plt.figure()
-    ax1 = fig.add_subplot(111)
-    cmap = cm.get_cmap('jet', 30)
-    cax = ax1.imshow(df.corr(), interpolation="nearest", cmap=cmap)
-    ax1.grid(True)
-    plt.title('Cervical Risk Feature Correlation')
-    labels=list(df.keys())
-    ax1.set_xticklabels(labels,fontsize=6)
-    ax1.set_yticklabels(labels,fontsize=6)
-    fig.colorbar(cax)
-    plt.show()
-
-correlation_matrix(df)
-
 
 
 X_train, X_test, y_train, y_test=train_test_split(X, y, test_size=0.3, random_state=seed)
@@ -80,10 +68,7 @@ from sklearn.metrics import accuracy_score
 from sklearn.metrics import confusion_matrix
 import matplotlib.pyplot as plt
 
-
 Models = [KNeighborsClassifier(n_neighbors=5),SVC(kernel="linear", C=0.05),MLPClassifier(alpha=1),DecisionTreeClassifier(max_depth=5),GaussianNB(),QuadraticDiscriminantAnalysis(),GaussianProcessClassifier(1.0 * RBF(1.0)),LogisticRegression(random_state=0,solver="liblinear")]
-
-
 for i in Models:
     i.fit(X_train,y_train)
     y = i.predict(X_test)
