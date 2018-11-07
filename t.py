@@ -1,40 +1,5 @@
 import cv2
 import numpy as np
-from sklearn import preprocessing
-import os
-from sklearn.model_selection import train_test_split
-from scipy.spatial import distance
-
-img_dir = "ImageDivision/Temp/"
-labels = ['carcinoma_in_situ','moderate_dysplastic','normal_superficiel']
-encoder = preprocessing.LabelEncoder()
-encoder.fit(labels)
-
-ratios=[]
-labels=[]
-cyto_rat = []
-kern_ratio = []
-def main():
-
-    for subdir, dirs, files in os.walk(img_dir):
-        #label name
-        l = str(subdir).split('/')[2]
-
-        for file in files:
-            le=encoder.transform([str(l)])[0]
-            img = subdir + os.sep + file
-
-            r,k,c=calc_ratio(img)
-
-            ratios.append(r)
-            kern_ratio.append(k)
-            cyto_rat.append(c)
-            labels.append(le)
-
-    print('Labels:',labels)
-    print('Ratios:',ratios)
-    print("KerneElong :",kern_ratio)
-    print("CytoElong :",cyto_rat)
 
 
 def calc_elon(f):
@@ -96,5 +61,4 @@ def calc_ratio(img):
             return r,ker_rat,cyto_rat
 
 
-if __name__ == '__main__':
-        main()
+print(calc_ratio("ImageDivision/Temp/carcinoma_in_situ/149056321-149056343-002-d.bmp"))
